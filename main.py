@@ -7,6 +7,7 @@ import os
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
 USER_API_URL = os.environ.get('USER_API_URL', 'http://18.228.48.67')
 
+
 app = Flask(__name__)
 client = MongoClient(MONGO_URL)
 db = client['transacoes_db']
