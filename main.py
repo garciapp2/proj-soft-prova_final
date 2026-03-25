@@ -28,7 +28,7 @@ def get_transacoes():
 @app.route("/transacao/<string:id>", methods=["DELETE"])
 def delete_transacao(id):
     result = transacoes_collection.delete_one({"id": id})
-    
+
     if result.deleted_count == 0:
         return jsonify({"mensagem": "Transação não encontrada."}), 404
         
@@ -37,7 +37,6 @@ def delete_transacao(id):
 @app.route("/transacao", methods=["POST"])
 def create_transacao():
     data = request.get_json()
-    
     if not data:
         return jsonify({"mensagem": "Corpo da requisição inválido. Forneça um JSON."}), 400
 
