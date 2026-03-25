@@ -134,7 +134,6 @@ Passo a passo do Dockerfile:
      - Baixa a imagem nova (`docker pull`)
      - Roda o container novo (`docker run`) com variáveis de ambiente
 
----
 
 ## PARTE 6 — SECRETS DO GITHUB (Configurar no repositório)
 
