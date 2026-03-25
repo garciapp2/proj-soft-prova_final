@@ -53,4 +53,4 @@ jobs:
             docker stop posts-api || true
             docker rm --force posts-api || true
             docker pull ${{ secrets.DOCKER_USER }}/posts-api:${{ github.sha }}
-            docker run -d -p 5002:5000 -e MONGO_URL=${{ secrets.MONGO_URL }} -e USER_API_URL=${{ secrets.USER_API_URL }} --network=rede --name posts-api ${{ secrets.DOCKER_USER }}/posts-api:${{ github.sha }}
+            docker run -d -p 5003:5000 -e MONGO_URL=${{ secrets.MONGO_URL }} -e USER_API_URL=${{ secrets.USER_API_URL }} --network=rede --name posts-api ${{ secrets.DOCKER_USER }}/posts-api:${{ github.sha }}
