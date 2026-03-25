@@ -79,7 +79,6 @@ def create_transacao():
         "valor_total": valor_total,
         "data_transacao": datetime.now().isoformat()
     }
-
     try:
         transacoes_collection.insert_one(nova_transacao)
         nova_transacao.pop("_id", None) 
@@ -90,4 +89,3 @@ def create_transacao():
 
 if __name__ == "__main__":
     app.run(debug=True, port=500)
-    
