@@ -42,12 +42,47 @@ const $ = (id) => document.getElementById(id);
 const api = () => API_BASE_URL.replace(/\/$/, "");
 const fail = (r) => { $("er").textContent = r.status || ""; };
 
-function roles(tok) {
+function normRoles(v) {
+  if (v == null) return [];
+  const a = Array.isArray(v) ? v : [v];
+  return a.map((x) => String(x).toUpperCase());
+}
+
+function rolesFromPayload(p) {
+  const s = new Set();
+  const add = (v) => normRoles(v).forEach((x) => s.add(x));
+  if (AUTH0_ROLES_CLAIM) add(p[AUTH0_ROLES_CLAIM]);
+  if (AUTH0_AUDIENCE) add(p[AUTH0_AUDIENCE.replace(/\/$/, "") + "/roles"]);
+  add(p.roles);
+  add(p.permissions);
+  for (const k of Object.keys(p)) {
+    if (k.endsWith("/roles")) add(p[k]);
+  }
+  return [...s];
+}
+
+function rolesFromAccess(tok) {
   try {
-    const p = JSON.parse(atob(tok.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
-    const r = p[AUTH0_ROLES_CLAIM] || p.roles || p.permissions || [];
-    return (Array.isArray(r) ? r : [r]).map((x) => String(x).toUpperCase());
-  } catch { return []; }
+    return rolesFromPayload(JSON.parse(atob(tok.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))));
+  } catch {
+    return [];
+  }
+}
+
+async function rolesAll() {
+  const acc = rolesFromAccess(await token());
+  const id = await client.getIdTokenClaims();
+  const s = new Set(acc);
+  if (id) {
+    for (const k of Object.keys(id)) {
+      if (k.endsWith("/roles") || k === "roles" || k === "permissions") addToSet(s, id[k]);
+    }
+  }
+  return [...s];
+}
+
+function addToSet(s, v) {
+  normRoles(v).forEach((x) => s.add(x));
 }
 
 let client;
@@ -73,9 +108,8 @@ const token = () => client.getTokenSilently({ authorizationParams: { audience: A
   if (!ok) return;
 
   const u = await client.getUser();
-  const t0 = await token();
-  const rs = roles(t0);
-  $("who").textContent = u.email || "";
+  const rs = await rolesAll();
+  $("who").textContent = (u.email || "") + (rs.length ? " [" + rs.join(", ") + "]" : "");
   $("adm").hidden = !rs.includes("ADMIN");
 
   async function load() {
@@ -84,7 +118,7 @@ const token = () => client.getTokenSilently({ authorizationParams: { audience: A
     if (!r.ok) { fail(r); $("lista").textContent = ""; return; }
     const data = await r.json();
     if (!data.length) { $("lista").textContent = "—"; return; }
-    const adm = roles(await token()).includes("ADMIN");
+    const adm = (await rolesAll()).includes("ADMIN");
     let h = "<table><tr><th>Cód</th><th>Nome</th><th>Preço</th><th>Status</th>" + (adm ? "<th></th>" : "") + "</tr>";
     for (const p of data) {
       h += "<tr><td>" + p.codigo + "</td><td>" + p.nome + "</td><td>" + p.preco + "</td><td>" + p.status + "</td>";

@@ -42,13 +42,21 @@ def jwt_payload():
 
 
 def roles(p):
-    for k in (ROLES_CLAIM, "roles", "permissions"):
-        v = p.get(k) if k else None
+    out = set()
+
+    def add(v):
         if isinstance(v, list):
-            return [str(x).upper() for x in v]
-        if isinstance(v, str) and v:
-            return [v.upper()]
-    return []
+            out.update(str(x).upper() for x in v)
+        elif isinstance(v, str) and v:
+            out.add(v.upper())
+
+    for k in (ROLES_CLAIM, "roles", "permissions"):
+        if k:
+            add(p.get(k))
+    for k, v in p.items():
+        if isinstance(k, str) and k.endswith("/roles"):
+            add(v)
+    return list(out)
 
 
 @app.get("/health")
