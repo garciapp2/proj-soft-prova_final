@@ -14,7 +14,6 @@ DOMAIN = os.environ.get("AUTH0_DOMAIN", "")
 AUDIENCE = os.environ.get("AUTH0_AUDIENCE", "")
 ROLES_CLAIM = os.environ.get("AUTH0_ROLES_CLAIM") or "https://proj-soft/roles"
 
-
 class Status(StrEnum):
     DISPONIVEL = "DISPONIVEL"
     INDISPONIVEL = "INDISPONIVEL"
